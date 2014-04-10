@@ -47,9 +47,14 @@
 extern "C" {
 #endif
 
-#if _WIN32
+#if _WIN32 && _MSC_VER
 # define breakpoint() do { \
 		if (debug_attached()) __debugbreak(); \
+		else { debug_trace(); abort(); } \
+	} while (0)
+#elif _WIN32 && __GNUC__
+# define breakpoint() do { \
+		if (debug_attached()) __builtin_trap(); \
 		else { debug_trace(); abort(); } \
 	} while (0)
 #elif __APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__

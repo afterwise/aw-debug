@@ -102,7 +102,7 @@ void debugf(const char *fmt, ...) {
 	va_start(ap, fmt);
 
 	if ((len = vsnprintf(buf, sizeof(buf) - 1, fmt, ap)) > 0) {
-		buf[len = ((int) sizeof buf - 2 < len) ? sizeof buf - 2 : len] = '\n';
+		buf[len = ((int) sizeof buf - 2 < len) ? (int) sizeof buf - 2 : len] = '\n';
 		buf[len += !!(buf[len - 1] - '\n')] = '\0';
 
 		output(buf, len);
@@ -124,7 +124,7 @@ void errorf(const char *fmt, ...) {
 	va_start(ap, fmt);
 
 	if ((len = vsnprintf(buf, sizeof(buf) - 1, fmt, ap)) > 0) {
-		buf[len = ((int) sizeof buf - 2 < len) ? sizeof buf - 2 : len] = '\n';
+		buf[len = ((int) sizeof buf - 2 < len) ? (int) sizeof buf - 2 : len] = '\n';
 		buf[len += !!(buf[len - 1] - '\n')] = '\0';
 
 #if _WIN32
@@ -165,7 +165,7 @@ void debug_hex(const void *p, size_t n) {
 			s[3 * 16 + 1 + y] = 0;
 		}
 
-		debugf("%08zx %s", (uintptr_t) p + x, s);
+		debugf("%p %s", (unsigned char *) p + x, s);
 	}
 }
 
