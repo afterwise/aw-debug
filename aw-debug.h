@@ -108,15 +108,15 @@ extern "C" {
 
 extern const char *debug_name;
 
-void abort();
+void abort(void);
 void exit(int);
 
 #if !NDEBUG
-bool debug_attached();
+bool debug_attached(void);
 void debugf(const char *fmt, ...) _debug_format(1, 2);
 void errorf(const char *fmt, ...) _debug_format(1, 2);
 void debug_hex(const void *p, size_t n);
-void debug_trace();
+void debug_trace(void);
 #else
 # define debug_attached() (0)
 # define debugf(...) ((void) 0)

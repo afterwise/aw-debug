@@ -55,7 +55,7 @@ const char *debug_name = "aw-debug";
 
 #if !NDEBUG
 
-bool debug_attached() {
+bool debug_attached(void) {
 #if _WIN32
 	return !!IsDebuggerPresent();
 #elif __APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
@@ -169,7 +169,7 @@ void debug_hex(const void *p, size_t n) {
 	}
 }
 
-void debug_trace() {
+void debug_trace(void) {
 #if (__linux__ && !__ANDROID__) || (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
 	void *trace[64];
 	char **syms;
