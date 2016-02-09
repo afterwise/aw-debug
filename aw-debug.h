@@ -1,6 +1,6 @@
 
 /*
-   Copyright (c) 2014 Malte Hildingsson, malte (at) afterwi.se
+   Copyright (c) 2014-2016 Malte Hildingsson, malte (at) afterwi.se
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,12 @@
 #ifndef AW_DEBUG_H
 #define AW_DEBUG_H
 
-#include <stddef.h>
-
 #if !_MSC_VER
 # include <stdbool.h>
 #endif
+
+#include <sys/types.h>
+#include <stddef.h>
 
 #if __GNUC__
 # define _debug_format(a,b) __attribute__((format(__printf__, a, b)))
@@ -40,8 +41,10 @@
 # define _debug_unlikely(x) (x)
 #endif
 
-#define debug_strize(a) debug_strize_impl(a)
-#define debug_strize_impl(a) #a
+#define _debug_join(a,b) _debug_join_impl(a, b)
+#define _debug_join_impl(a,b) a ## b
+#define _debug_strize(a) _debug_strize_impl(a)
+#define _debug_strize_impl(a) #a
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,11 +79,11 @@ extern "C" {
 
 #if !NDEBUG
 # define _check_impl(f,l,d) do { \
-		errorf(f ":" debug_strize(l) ": " d); \
+		errorf(f ":" _debug_strize(l) ": " d); \
 		breakpoint(); \
 	} while (0)
 # define _checkf_impl(f,l,d,...) do { \
-		errorf(f ":" debug_strize(l) ": " d __VA_ARGS__); \
+		errorf(f ":" _debug_strize(l) ": " d __VA_ARGS__); \
 		breakpoint(); \
 	} while (0)
 # define check(_expr) do { \
@@ -105,6 +108,11 @@ extern "C" {
 # define trespass() ((void) 0)
 # define trespassf(...) ((void) 0)
 #endif
+
+#define _try(res) \
+	ssize_t _debug_join(_try__, __LINE__) = (res); \
+	if (_debug_unlikely(_debug_join(_try__, __LINE__) < 0)) \
+		switch (_debug_join(_try__, __LINE__))
 
 extern const char *debug_name;
 
