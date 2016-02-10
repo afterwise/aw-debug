@@ -35,12 +35,16 @@
 
 #if __APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
 # include <sys/sysctl.h>
-# include <unistd.h>
 #endif
 
 #if (__linux__ && !__ANDROID__) || (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
 # include <execinfo.h>
 # include <stdlib.h>
+# include <unistd.h>
+#endif
+
+#if __linux__
+# include <stdio_ext.h>
 #endif
 
 #include <ctype.h>
@@ -54,6 +58,27 @@
 const char *debug_name = "aw-debug";
 
 #if !NDEBUG
+
+int debug_getchar(void) {
+#if _WIN32
+	CONSOLE_SCREEN_BUFFER_INFO info;
+	HANDLE handle = GetStdHandle(STD_INPUT_HANDLE);
+	FlushConsoleInputBuffer(handle);
+#elif __linux__
+	__fpurge(stdin);
+#else
+	fpurge(stdin);
+#endif
+	return getchar();
+}
+
+bool debug_isatty(void) {
+#if _WIN32
+	return !!_isatty(_fileno(stdin));
+#else
+	return !!isatty(fileno(stdin));
+#endif
+}
 
 bool debug_attached(void) {
 #if _WIN32

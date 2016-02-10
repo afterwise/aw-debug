@@ -52,18 +52,45 @@ extern "C" {
 
 #if _WIN32 && _MSC_VER
 # define breakpoint() do { \
-		if (debug_attached()) __debugbreak(); \
-		else { debug_trace(); abort(); } \
+		static unsigned char _debug_join(_bkpt__, __LINE__); \
+		if (_debug_likely(!_debug_join(_bkpt__, __LINE__))) { \
+			if (debug_isatty()) \
+				debugf("-- Skip breakpoint? [y/a/N] --"); \
+				switch(debug_getchar()) { \
+				case 'A': case 'a':  _debug_join(_bkpt__, __LINE__) = 1; \
+				case 'Y': case 'y':  goto _debug_join(_label__, __LINE__); \
+			} \
+			if (debug_attached()) __debugbreak(); \
+			else { debug_trace(); abort(); } \
+		} _debug_join(_label__, __LINE__): ((void) 0); \
 	} while (0)
 #elif _WIN32 && __GNUC__
 # define breakpoint() do { \
-		if (debug_attached()) __builtin_trap(); \
-		else { debug_trace(); abort(); } \
+		static unsigned char _debug_join(_bkpt__, __LINE__); \
+		if (_debug_likely(!_debug_join(_bkpt__, __LINE__))) { \
+			if (debug_isatty()) \
+				debugf("-- Skip breakpoint? [y/a/N] --"); \
+				switch(debug_getchar()) { \
+				case 'A': case 'a':  _debug_join(_bkpt__, __LINE__) = 1; \
+				case 'Y': case 'y':  goto _debug_join(_label__, __LINE__); \
+			} \
+			if (debug_attached()) __builtin_trap(); \
+			else { debug_trace(); abort(); } \
+		} _debug_join(_label__, __LINE__): ((void) 0); \
 	} while (0)
-#elif __APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
+#elif (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) || (__linux__ && !__ANDROID__)
 # define breakpoint() do { \
-		if (debug_attached()) __builtin_trap(); \
-		else { debug_trace(); exit(1); } \
+		static unsigned char _debug_join(_bkpt__, __LINE__); \
+		if (_debug_likely(!_debug_join(_bkpt__, __LINE__))) { \
+			if (debug_isatty()) \
+				debugf("-- Skip breakpoint? [y/a/N] --"); \
+				switch(debug_getchar()) { \
+				case 'A': case 'a':  _debug_join(_bkpt__, __LINE__) = 1; \
+				case 'Y': case 'y':  goto _debug_join(_label__, __LINE__); \
+			} \
+			if (debug_attached()) __builtin_trap(); \
+			else { debug_trace(); exit(1); } \
+		} _debug_join(_label__, __LINE__): ((void) 0); \
 	} while (0)
 #elif __PPU__
 # define breakpoint() do { __asm__ __volatile__ ("tw 31, 1, 1"); } while (0)
@@ -120,12 +147,16 @@ void abort(void);
 void exit(int);
 
 #if !NDEBUG
+int debug_getchar(void);
+bool debug_isatty(void);
 bool debug_attached(void);
 void debugf(const char *fmt, ...) _debug_format(1, 2);
 void errorf(const char *fmt, ...) _debug_format(1, 2);
 void debug_hex(const void *p, size_t n);
 void debug_trace(void);
 #else
+# define debug_getchar() (0)
+# define debug_isatty() (0)
 # define debug_attached() (0)
 # define debugf(...) ((void) 0)
 # define errorf(...) ((void) 0)

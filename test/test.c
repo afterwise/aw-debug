@@ -34,8 +34,10 @@ int main(int argc, char *argv[]) {
 	_try(i_will_fail())
 		default: errorf("function did fail");
 
-	errorf("I am to blame");
-	trespass();
+	for (int i = 0; i < 5; ++i) {
+		errorf("I am to blame");
+		trespass();
+	}
 
 	return 0;
 }
