@@ -61,9 +61,7 @@ const char *debug_name = "aw-debug";
 
 int debug_getchar(void) {
 #if _WIN32
-	CONSOLE_SCREEN_BUFFER_INFO info;
-	HANDLE handle = GetStdHandle(STD_INPUT_HANDLE);
-	FlushConsoleInputBuffer(handle);
+	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 #elif __linux__
 	__fpurge(stdin);
 #else
