@@ -195,16 +195,10 @@ void debug_hex(const void *p, size_t n) {
 void debug_trace(void) {
 #if (__linux__ && !__ANDROID__) || (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
 	void *trace[64];
-	char **syms;
-	size_t i, n;
+	size_t n;
 
 	n = backtrace(trace, array_count(trace));
-	syms = backtrace_symbols(trace, n);
-
-	for (i = 0; i < n; ++i)
-		debugf("%s", syms[i]);
-
-	free(syms);
+	backtrace_symbols_fd(trace, n, STDERR_FILENO);
 #elif __CELLOS_LV2__ && __PPU__
 	uintptr_t trace[64];
 	size_t i;

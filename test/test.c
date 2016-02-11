@@ -23,21 +23,20 @@ int main(int argc, char *argv[]) {
 	debug_name = "test";
 
 	debugf("Hello world");
+	debugf("This is %s", debug_isatty() ? "live" : "only a recording");
 	debugf("I am %s to you", debug_attached() ? "attached" : "not attached");
 
 	foo();
 
+	debugf("These are my innermost:");
 	debug_hex(&main, 64);
 
 	check(var > 0);
 
 	_try(i_will_fail())
-		default: errorf("function did fail");
+		default: errorf("My function failed");
 
-	for (int i = 0; i < 5; ++i) {
-		errorf("I am to blame");
-		trespass();
-	}
+	errorf("I am to blame");
 
 	return 0;
 }
