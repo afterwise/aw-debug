@@ -1,5 +1,5 @@
 
-export CFLAGS += -std=c99 -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200809L -D_DARWIN_C_SOURCE -Wall -Wextra
+export CFLAGS += -std=c99 -Wall -Wextra
 
 ifeq ($(shell uname -s),Linux)
 export LDFLAGS += -rdynamic
