@@ -56,7 +56,7 @@
 # include <unistd.h>
 #endif
 
-#if __linux__
+#if __linux__ && !__ANDROID__
 # include <stdio_ext.h>
 #endif
 
@@ -75,7 +75,7 @@ const char *debug_name = "aw-debug";
 int debug_getchar(void) {
 #if _WIN32
 	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-#elif __linux__
+#elif __linux__ && !__ANDROID__
 	__fpurge(stdin);
 #else
 	fpurge(stdin);
@@ -86,6 +86,8 @@ int debug_getchar(void) {
 bool debug_isatty(void) {
 #if _WIN32
 	return !!_isatty(_fileno(stdin));
+#elif __ANDROID__
+	return false;
 #else
 	return !!isatty(fileno(stdin));
 #endif
