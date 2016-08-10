@@ -53,6 +53,9 @@
 #if (__linux__ && !__ANDROID__) || (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
 # include <execinfo.h>
 # include <stdlib.h>
+#endif
+
+#if __linux__ || __APPLE__
 # include <unistd.h>
 #endif
 
@@ -86,8 +89,6 @@ int debug_getchar(void) {
 bool debug_isatty(void) {
 #if _WIN32
 	return !!_isatty(_fileno(stdin));
-#elif __ANDROID__
-	return false;
 #else
 	return !!isatty(fileno(stdin));
 #endif
