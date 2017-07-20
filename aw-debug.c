@@ -36,6 +36,11 @@
 
 #include "aw-debug.h"
 
+#if _WIN32
+# include <windows.h>
+# include <io.h>
+#endif
+
 #if __CELLOS_LV2__
 # if __PPU__
 #  include <sys/tty.h>
