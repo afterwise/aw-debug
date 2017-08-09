@@ -122,8 +122,12 @@ static void output(const char *str, int len) {
 #if _WIN32
 	if (IsDebuggerPresent())
 		OutputDebugStringA(str);
-	else
+	else {
 		fputs(str, stderr);
+# if __MINGW32__
+		fflush(stderr);
+# endif
+	}
 #elif __CELLOS_LV2__
 # if __PPU__
 	unsigned res;
