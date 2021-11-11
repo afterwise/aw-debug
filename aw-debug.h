@@ -29,7 +29,7 @@
 #endif
 
 #include <sys/types.h>
-#include <stddef.h>
+#include <stdlib.h>
 
 #if __GNUC__
 # define _debug_format(a,b) __attribute__((format(__printf__, a, b)))
@@ -142,9 +142,6 @@ extern "C" {
 		switch (_debug_join(_try__, __LINE__))
 
 extern const char *debug_name;
-
-void abort(void);
-void exit(int);
 
 #if !NDEBUG
 int debug_getchar(void);
