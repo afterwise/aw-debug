@@ -21,7 +21,7 @@
    THE SOFTWARE.
  */
 
-#ifndef _nofeatures
+#ifndef _debug_nofeatures
 # if _WIN32
 #  define WIN32_LEAN_AND_MEAN 1
 # elif __linux__
@@ -32,12 +32,13 @@
 # elif __APPLE__
 #  define _DARWIN_C_SOURCE 1
 # endif
-#endif /* _nofeatures */
+#endif /* _debug_nofeatures */
 
 #include "aw-debug.h"
 
 #if _WIN32
 # include <windows.h>
+# include <dbghelp.h>
 # include <io.h>
 #endif
 
@@ -122,12 +123,10 @@ static void output(const char *str, int len) {
 #if _WIN32
 	if (IsDebuggerPresent())
 		OutputDebugStringA(str);
-	else {
-		fputs(str, stderr);
+	fputs(str, stderr);
 # if __MINGW32__
-		fflush(stderr);
+	fflush(stderr);
 # endif
-	}
 #elif __CELLOS_LV2__
 # if __PPU__
 	unsigned res;
@@ -218,7 +217,29 @@ void debug_hex(const void *p, size_t n) {
 }
 
 void debug_trace(void) {
-#if (__linux__ && !__ANDROID__) || (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
+#if _WIN32
+	HANDLE proc = GetCurrentProcess();
+	void *trace[64];
+	size_t i, n;
+	union {
+		SYMBOL_INFO sym;
+		unsigned char buf[256];
+	} u;
+
+	SymInitialize(proc, NULL, TRUE);
+	n = CaptureStackBackTrace(0, array_count(trace), trace, NULL);
+
+	for (i = 0; i < n; ++i) {
+		memset(&u.sym, 0, sizeof u.sym);
+		u.sym.SizeOfStruct = sizeof u.sym;
+		u.sym.MaxNameLen = (sizeof u.buf - sizeof u.sym) * sizeof(CHAR);
+
+		if (SymFromAddr(proc, (uintptr_t) trace[i], NULL, &u.sym))
+			debugf("%08p %s\n", trace[i], u.sym.Name);
+	}
+
+	SymCleanup(proc);
+#elif (__linux__ && !__ANDROID__) || (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
 	void *trace[64];
 	size_t n;
 

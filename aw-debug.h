@@ -24,7 +24,7 @@
 #ifndef AW_DEBUG_H
 #define AW_DEBUG_H
 
-#if !_MSC_VER
+#if !_MSC_VER || _MSC_VER >= 1800
 # include <stdbool.h>
 #endif
 
@@ -61,7 +61,7 @@ extern "C" {
 				case 'Y': case 'y':  goto _debug_join(_label__, __LINE__); \
 			} \
 			if (debug_attached()) __debugbreak(); \
-			else { debug_trace(); abort(); } \
+			else { abort(); } \
 		} _debug_join(_label__, __LINE__): ((void) 0); \
 	} while (0)
 #elif _WIN32 && __GNUC__
@@ -75,7 +75,7 @@ extern "C" {
 				case 'Y': case 'y':  goto _debug_join(_label__, __LINE__); \
 			} \
 			if (debug_attached()) __builtin_trap(); \
-			else { debug_trace(); abort(); } \
+			else { abort(); } \
 		} _debug_join(_label__, __LINE__): ((void) 0); \
 	} while (0)
 #elif (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) || (__linux__ && !__ANDROID__)
@@ -89,7 +89,7 @@ extern "C" {
 				case 'Y': case 'y':  goto _debug_join(_label__, __LINE__); \
 			} \
 			if (debug_attached()) __builtin_trap(); \
-			else { debug_trace(); exit(1); } \
+			else { exit(1); } \
 		} _debug_join(_label__, __LINE__): ((void) 0); \
 	} while (0)
 #elif __PPU__
@@ -107,10 +107,12 @@ extern "C" {
 #if !NDEBUG
 # define _check_impl(f,l,d) do { \
 		errorf(f ":" _debug_strize(l) ": " d); \
+		debug_trace(); \
 		breakpoint(); \
 	} while (0)
 # define _checkf_impl(f,l,d,...) do { \
 		errorf(f ":" _debug_strize(l) ": " d __VA_ARGS__); \
+		debug_trace(); \
 		breakpoint(); \
 	} while (0)
 # define check(_expr) do { \
