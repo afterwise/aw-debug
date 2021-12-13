@@ -1,4 +1,4 @@
-
+/* vim: set ts=4 sw=4 noet : */
 /*
    Copyright (c) 2014-2021 Malte Hildingsson, malte (at) afterwi.se
 
