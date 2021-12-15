@@ -31,6 +31,21 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
+#if defined(_debug_dllexport)
+# if _MSC_VER
+#  define _debug_api extern __declspec(dllexport)
+# elif __GNUC__
+#  define _debug_api __attribute__((visibility("default"))) extern
+# endif
+#elif defined(_debug_dllimport)
+# if _MSC_VER
+#  define _debug_api extern __declspec(dllimport)
+# endif
+#endif
+#ifndef _debug_api
+# define _debug_api extern
+#endif
+
 #if __GNUC__
 # define _debug_format(a,b) __attribute__((format(__printf__, a, b)))
 # define _debug_likely(x) __builtin_expect(!!(x), 1)
@@ -146,13 +161,13 @@ extern "C" {
 extern const char *debug_name;
 
 #if !NDEBUG
-int debug_getchar(void);
-bool debug_isatty(void);
-bool debug_attached(void);
-void debugf(const char *fmt, ...) _debug_format(1, 2);
-void errorf(const char *fmt, ...) _debug_format(1, 2);
-void debug_hex(const void *p, size_t n);
-void debug_trace(void);
+_debug_api int debug_getchar(void);
+_debug_api bool debug_isatty(void);
+_debug_api bool debug_attached(void);
+_debug_api void debugf(const char *fmt, ...) _debug_format(1, 2);
+_debug_api void errorf(const char *fmt, ...) _debug_format(1, 2);
+_debug_api void debug_hex(const void *p, size_t n);
+_debug_api void debug_trace(void);
 #else
 # define debug_getchar() (0)
 # define debug_isatty() (0)

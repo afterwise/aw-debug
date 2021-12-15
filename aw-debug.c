@@ -74,8 +74,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define array_count(a) (sizeof (a) / sizeof (a)[0])
-#define align(i,a) (((i) + (a) - 1) & ~((a) - 1))
+#define _debug_array_count(a) (sizeof (a) / sizeof (a)[0])
+#define _debug_align(v,n) (((v) + (n) - 1) & ~((n) - 1))
 
 const char *debug_name = "aw-debug";
 
@@ -108,7 +108,7 @@ bool debug_attached(void) {
 	size_t n = sizeof info;
 	int err, mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
 
-	if ((err = sysctl(mib, array_count(mib), &info, &n, NULL, 0)) < 0)
+	if ((err = sysctl(mib, _debug_array_count(mib), &info, &n, NULL, 0)) < 0)
 		return false;
 
 	return !!(info.kp_proc.p_flag & P_TRACED);
@@ -196,10 +196,10 @@ void errorf(const char *fmt, ...) {
 void debug_hex(const void *p, size_t n) {
 	size_t x, y, m;
 
-	for (x = 0, m = n; x < align(m, 16u); x += 16, n -= 16) {
+	for (x = 0, m = n; x < _debug_align(m, 16u); x += 16, n -= 16) {
 		char s[3 * 16 + 18];
 
-		for (y = 0; y < array_count(s); ++y)
+		for (y = 0; y < _debug_array_count(s); ++y)
 			s[y] = ' ';
 
 		for (y = 0; y < ((n < 16ull) ? n : 16ull); ++y) {
@@ -227,7 +227,7 @@ void debug_trace(void) {
 	} u;
 
 	SymInitialize(proc, NULL, TRUE);
-	n = CaptureStackBackTrace(0, array_count(trace), trace, NULL);
+	n = CaptureStackBackTrace(0, _debug_array_count(trace), trace, NULL);
 
 	for (i = 0; i < n; ++i) {
 		memset(&u.sym, 0, sizeof u.sym);
@@ -243,7 +243,7 @@ void debug_trace(void) {
 	void *trace[64];
 	size_t n;
 
-	n = backtrace(trace, array_count(trace));
+	n = backtrace(trace, _debug_array_count(trace));
 	backtrace_symbols_fd(trace, n, STDERR_FILENO);
 #elif __CELLOS_LV2__ && __PPU__
 	uintptr_t trace[64];
@@ -253,8 +253,8 @@ void debug_trace(void) {
 	if (_debug_unlikely(cellDbgPpuThreadCountStackFrames(&n) < 0))
 		return;
 
-	if (n > array_count(trace))
-		n = array_count(trace);
+	if (n > _debug_array_count(trace))
+		n = _debug_array_count(trace);
 
 	if (_debug_unlikely(cellDbgPpuThreadGetStackBackTrace(0, n, trace, NULL) < 0))
 		return;
