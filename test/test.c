@@ -14,13 +14,17 @@ int i_will_fail() {
 	return -1;
 }
 
+int i_will_not_fail() {
+	return 0;
+}
+
 int var = 1;
 
 int main(int argc, char *argv[]) {
 	(void) argc;
 	(void) argv;
 
-	debug_name = "test";
+	_debug_name = "test";
 
 	debugf("Hello world");
 	debugf("This is %s", debug_isatty() ? "live" : "only a recording");
@@ -34,7 +38,10 @@ int main(int argc, char *argv[]) {
 	check(var > 0);
 
 	_try(i_will_fail())
-		default: errorf("My function failed");
+		default: errorf("My function failed, as expected");
+
+	_try(i_will_not_fail())
+		default: errorf("My function failed, though it should not");
 
 	errorf("I am to blame");
 

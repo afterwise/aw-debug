@@ -77,7 +77,7 @@
 #define _debug_array_count(a) (sizeof (a) / sizeof (a)[0])
 #define _debug_align(v,n) (((v) + (n) - 1) & ~((n) - 1))
 
-const char *debug_name = "aw-debug";
+const char *_debug_name = "aw-debug";
 
 #if !NDEBUG
 
@@ -135,7 +135,7 @@ static void output(const char *str, int len) {
 	spu_printf("%.*s\n", len, str);
 # endif
 #elif __ANDROID__
-	__android_log_print(ANDROID_LOG_INFO, debug_name, str);
+	__android_log_print(ANDROID_LOG_INFO, _debug_name, str);
 #else
 	fputs(str, stderr);
 #endif

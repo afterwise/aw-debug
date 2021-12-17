@@ -158,7 +158,7 @@ extern "C" {
 	if (_debug_unlikely(_debug_join(_try__, __LINE__) < 0)) \
 		switch (_debug_join(_try__, __LINE__))
 
-extern const char *debug_name;
+_debug_api const char *_debug_name;
 
 #if !NDEBUG
 _debug_api int debug_getchar(void);
