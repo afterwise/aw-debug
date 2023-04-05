@@ -161,11 +161,6 @@ extern "C" {
 # define trespassf(...) ((void) 0)
 #endif
 
-#define _try(res) \
-	ssize_t _debug_join(_try__, __LINE__) = (res); \
-	if (_debug_unlikely(_debug_join(_try__, __LINE__) < 0)) \
-		switch (_debug_join(_try__, __LINE__))
-
 _debug_api const char *_debug_name;
 
 #if DEBUG_ENABLE
