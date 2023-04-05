@@ -1,6 +1,6 @@
 /* vim: set ts=4 sw=4 noet : */
 /*
-   Copyright (c) 2014-2021 Malte Hildingsson, malte (at) afterwi.se
+   Copyright (c) 2014-2023 Malte Hildingsson, malte (at) afterwi.se
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -22,50 +22,50 @@
  */
 
 #ifndef _debug_nofeatures
-# if _WIN32
+# if defined(_WIN32)
 #  define WIN32_LEAN_AND_MEAN 1
-# elif __linux__
+# elif defined(__linux__)
 #  define _BSD_SOURCE 1
 #  define _DEFAULT_SOURCE 1
 #  define _POSIX_C_SOURCE 200809L
 #  define _SVID_SOURCE 1
-# elif __APPLE__
+# elif defined(__APPLE__)
 #  define _DARWIN_C_SOURCE 1
 # endif
 #endif /* _debug_nofeatures */
 
 #include "aw-debug.h"
 
-#if _WIN32
+#if defined(_WIN32)
 # include <windows.h>
 # include <dbghelp.h>
 # include <io.h>
 #endif
 
-#if __CELLOS_LV2__
-# if __PPU__
+#if defined(__CELLOS_LV2__)
+# if defined(__PPU__)
 #  include <sys/tty.h>
-# elif __SPU__
+# elif defined(__SPU__)
 #  include <spu_printf.h>
 # endif
-#elif __ANDROID__
+#elif defined(__ANDROID__)
 # include <android/log.h>
 #endif
 
-#if __APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
+#if defined(__APPLE__) && !defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
 # include <sys/sysctl.h>
 #endif
 
-#if (__linux__ && !__ANDROID__) || (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
+#if (defined(__linux__) && !defined(__ANDROID__)) || (defined(__APPLE__) && !defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__))
 # include <execinfo.h>
 # include <stdlib.h>
 #endif
 
-#if __linux__ || __APPLE__
+#if defined(__linux__) || defined(__APPLE__)
 # include <unistd.h>
 #endif
 
-#if __linux__ && !__ANDROID__
+#if defined(__linux__) && !defined(__ANDROID__)
 # include <stdio_ext.h>
 #endif
 
@@ -79,12 +79,12 @@
 
 const char *_debug_name = "aw-debug";
 
-#if !NDEBUG
+#if !defined(NDEBUG) || !NDEBUG
 
 int debug_getchar(void) {
-#if _WIN32
+#if defined(_WIN32)
 	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-#elif __linux__ && !__ANDROID__
+#elif defined(__linux__) && !defined(__ANDROID__)
 	__fpurge(stdin);
 #else
 	fpurge(stdin);
@@ -93,7 +93,7 @@ int debug_getchar(void) {
 }
 
 bool debug_isatty(void) {
-#if _WIN32
+#if defined(_WIN32)
 	return !!_isatty(_fileno(stdin));
 #else
 	return !!isatty(fileno(stdin));
@@ -101,9 +101,9 @@ bool debug_isatty(void) {
 }
 
 bool debug_attached(void) {
-#if _WIN32
+#if defined(_WIN32)
 	return !!IsDebuggerPresent();
-#elif __APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
+#elif defined(__APPLE__) && !defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
 	struct kinfo_proc info;
 	size_t n = sizeof info;
 	int err, mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
@@ -120,21 +120,21 @@ bool debug_attached(void) {
 static void output(const char *str, int len) {
 	(void) len;
 
-#if _WIN32
+#if defined(_WIN32)
 	if (IsDebuggerPresent())
 		OutputDebugStringA(str);
 	fputs(str, stderr);
-# if __MINGW32__
+# if defined(__MINGW32__)
 	fflush(stderr);
 # endif
-#elif __CELLOS_LV2__
-# if __PPU__
+#elif defined(__CELLOS_LV2__)
+# if defined(__PPU__)
 	unsigned res;
 	sys_tty_write(SYS_TTYP3, str, len, &res);
-# elif __SPU__
+# elif defined(__SPU__)
 	spu_printf("%.*s\n", len, str);
 # endif
-#elif __ANDROID__
+#elif defined(__ANDROID__)
 	__android_log_print(ANDROID_LOG_INFO, _debug_name, str);
 #else
 	fputs(str, stderr);
@@ -159,7 +159,7 @@ void debugf(const char *fmt, ...) {
 }
 
 void errorf(const char *fmt, ...) {
-#if _WIN32
+#if defined(_WIN32)
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 #endif
@@ -174,18 +174,18 @@ void errorf(const char *fmt, ...) {
 		buf[len = ((int) sizeof buf - 2 < len) ? (int) sizeof buf - 2 : len] = '\n';
 		buf[len += !!(buf[len - 1] - '\n')] = '\0';
 
-#if _WIN32
+#if defined(_WIN32)
 		GetConsoleScreenBufferInfo(handle, &info);
 		SetConsoleTextAttribute(handle, FOREGROUND_RED);
-#elif (__linux__ && !__ANDROID__) || (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
+#elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__APPLE__) && !defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__))
 		output("\033[0;31m", 7);
 #endif
 
 		output(buf, len);
 
-#if _WIN32
+#if defined(_WIN32)
 		SetConsoleTextAttribute(handle, info.wAttributes);
-#elif (__linux__ && !__ANDROID__) || (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
+#elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__APPLE__) && !defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__))
 		output("\033[0m", 4);
 #endif
 	}
@@ -217,7 +217,7 @@ void debug_hex(const void *p, size_t n) {
 }
 
 void debug_trace(void) {
-#if _WIN32
+#if defined(_WIN32)
 	HANDLE proc = GetCurrentProcess();
 	void *trace[64];
 	size_t i, n;
@@ -239,13 +239,13 @@ void debug_trace(void) {
 	}
 
 	SymCleanup(proc);
-#elif (__linux__ && !__ANDROID__) || (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
+#elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__APPLE__) && !defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__))
 	void *trace[64];
 	size_t n;
 
 	n = backtrace(trace, _debug_array_count(trace));
 	backtrace_symbols_fd(trace, n, STDERR_FILENO);
-#elif __CELLOS_LV2__ && __PPU__
+#elif defined(__CELLOS_LV2__) && defined(__PPU__)
 	uintptr_t trace[64];
 	size_t i;
 	unsigned n;
@@ -264,5 +264,5 @@ void debug_trace(void) {
 #endif
 }
  
-#endif /* !NDEBUG */
+#endif /* !defined(NDEBUG) || !NDEBUG */
 

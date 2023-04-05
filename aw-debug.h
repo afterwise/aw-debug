@@ -1,6 +1,6 @@
 /* vim: set ts=4 sw=4 noet : */
 /*
-   Copyright (c) 2014-2021 Malte Hildingsson, malte (at) afterwi.se
+   Copyright (c) 2014-2023 Malte Hildingsson, malte (at) afterwi.se
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -32,13 +32,13 @@
 #include <stdlib.h>
 
 #if defined(_debug_dllexport)
-# if _MSC_VER
+# if defined(_MSC_VER)
 #  define _debug_api extern __declspec(dllexport)
-# elif __GNUC__
+# elif defined(__GNUC__)
 #  define _debug_api __attribute__((visibility("default"))) extern
 # endif
 #elif defined(_debug_dllimport)
-# if _MSC_VER
+# if defined(_MSC_VER)
 #  define _debug_api extern __declspec(dllimport)
 # endif
 #endif
@@ -46,7 +46,7 @@
 # define _debug_api extern
 #endif
 
-#if __GNUC__
+#if defined(__GNUC__)
 # define _debug_format(a,b) __attribute__((format(__printf__, a, b)))
 # define _debug_likely(x) __builtin_expect(!!(x), 1)
 # define _debug_unlikely(x) __builtin_expect(!!(x), 0)
@@ -65,7 +65,7 @@
 extern "C" {
 #endif
 
-#if _WIN32 && _MSC_VER
+#if defined(_WIN32) && defined(_MSC_VER)
 # define breakpoint() do { \
 		static unsigned char _debug_join(_bkpt__, __LINE__); \
 		if (_debug_likely(!_debug_join(_bkpt__, __LINE__))) { \
@@ -79,7 +79,7 @@ extern "C" {
 			else { abort(); } \
 		} _debug_join(_label__, __LINE__): ((void) 0); \
 	} while (0)
-#elif _WIN32 && __GNUC__
+#elif defined(_WIN32) && defined(__GNUC__)
 # define breakpoint() do { \
 		static unsigned char _debug_join(_bkpt__, __LINE__); \
 		if (_debug_likely(!_debug_join(_bkpt__, __LINE__))) { \
@@ -93,7 +93,7 @@ extern "C" {
 			else { abort(); } \
 		} _debug_join(_label__, __LINE__): ((void) 0); \
 	} while (0)
-#elif (__APPLE__ && !__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) || (__linux__ && !__ANDROID__)
+#elif (defined(__APPLE__) && !defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)) || (defined(__linux__) && !defined(__ANDROID__))
 # define breakpoint() do { \
 		static unsigned char _debug_join(_bkpt__, __LINE__); \
 		if (_debug_likely(!_debug_join(_bkpt__, __LINE__))) { \
@@ -107,19 +107,19 @@ extern "C" {
 			else { exit(1); } \
 		} _debug_join(_label__, __LINE__): ((void) 0); \
 	} while (0)
-#elif __PPU__
+#elif defined(__PPU__)
 # define breakpoint() do { __asm__ __volatile__ ("tw 31, 1, 1"); } while (0)
-#elif __SPU__
+#elif defined(__SPU__)
 # define breakpoint() do { __asm__ __volatile__ ("stopd 0, 1, 1"); } while (0)
-#elif _MSC_VER
+#elif defined(_MSC_VER)
 # define breakpoint() do { __debugbreak(); } while (0)
-#elif __GNUC__
+#elif defined(__GNUC__)
 # define breakpoint() do { __builtin_trap(); } while (0)
 #else
 # define breakpoint() do { abort(); } while (0)
 #endif
 
-#if !NDEBUG
+#if !defined(NDEBUG) || !NDEBUG
 # define _check_impl(f,l,d) do { \
 		errorf(f ":" _debug_strize(l) ": " d); \
 		debug_trace(); \
@@ -160,7 +160,7 @@ extern "C" {
 
 _debug_api const char *_debug_name;
 
-#if !NDEBUG
+#if !defined(NDEBUG) || !NDEBUG
 _debug_api int debug_getchar(void);
 _debug_api bool debug_isatty(void);
 _debug_api bool debug_attached(void);
