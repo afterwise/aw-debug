@@ -79,7 +79,7 @@
 
 const char *_debug_name = "aw-debug";
 
-#if !defined(NDEBUG) || !NDEBUG
+#if defined(DEBUG_ENABLE)
 
 int debug_getchar(void) {
 #if defined(_WIN32)
@@ -263,6 +263,6 @@ void debug_trace(void) {
 		debugf("0x%08x", trace[i]);
 #endif
 }
- 
-#endif /* !defined(NDEBUG) || !NDEBUG */
+
+#endif /* defined(DEBUG_ENABLE) */
 

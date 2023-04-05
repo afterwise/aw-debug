@@ -61,6 +61,14 @@
 #define _debug_strize(a) _debug_strize_impl(a)
 #define _debug_strize_impl(a) #a
 
+#if !defined(DEBUG_ENABLE) && !defined(DEBUG_DISABLE)
+# if defined(_DEBUG) || !defined(NDEBUG)
+#  define DEBUG_ENABLE 1
+# else
+#  define DEBUG_DISABLE 1
+# endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -119,7 +127,7 @@ extern "C" {
 # define breakpoint() do { abort(); } while (0)
 #endif
 
-#if !defined(NDEBUG) || !NDEBUG
+#if DEBUG_ENABLE
 # define _check_impl(f,l,d) do { \
 		errorf(f ":" _debug_strize(l) ": " d); \
 		debug_trace(); \
@@ -160,7 +168,7 @@ extern "C" {
 
 _debug_api const char *_debug_name;
 
-#if !defined(NDEBUG) || !NDEBUG
+#if DEBUG_ENABLE
 _debug_api int debug_getchar(void);
 _debug_api bool debug_isatty(void);
 _debug_api bool debug_attached(void);
