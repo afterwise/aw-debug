@@ -127,7 +127,7 @@ extern "C" {
 # define breakpoint() do { abort(); } while (0)
 #endif
 
-#if DEBUG_ENABLE
+#if defined(DEBUG_ENABLE)
 # define _check_impl(f,l,d) do { \
 		errorf(f ":" _debug_strize(l) ": " d); \
 		debug_trace(); \
@@ -163,7 +163,7 @@ extern "C" {
 
 _debug_api const char *_debug_name;
 
-#if DEBUG_ENABLE
+#if defined(DEBUG_ENABLE)
 _debug_api int debug_getchar(void);
 _debug_api bool debug_isatty(void);
 _debug_api bool debug_attached(void);
