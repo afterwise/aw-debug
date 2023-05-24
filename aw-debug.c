@@ -219,7 +219,7 @@ void debug_hex(const void *p, size_t n) {
 }
 
 void debug_trace(void) {
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(_XBOX) && !defined(_XBOX_ONE)
 	HANDLE proc = GetCurrentProcess();
 	void *trace[64];
 	size_t i, n;
