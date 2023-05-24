@@ -24,7 +24,7 @@
 #ifndef AW_DEBUG_H
 #define AW_DEBUG_H
 
-#if !_MSC_VER || _MSC_VER >= 1800
+#if !defined(_MSC_VER) || _MSC_VER >= 1800
 # include <stdbool.h>
 #endif
 

@@ -86,7 +86,7 @@ int debug_getchar(void) {
 	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 #elif defined(__linux__) && !defined(__ANDROID__)
 	__fpurge(stdin);
-#else
+#elif defined(__APPLE__) && !defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
 	fpurge(stdin);
 #endif
 	return getchar();
@@ -95,8 +95,10 @@ int debug_getchar(void) {
 bool debug_isatty(void) {
 #if defined(_WIN32)
 	return !!_isatty(_fileno(stdin));
-#else
+#elif defined(__linux__) || defined(__APPLE__)
 	return !!isatty(fileno(stdin));
+#else
+	return false;
 #endif
 }
 
@@ -159,7 +161,7 @@ void debugf(const char *fmt, ...) {
 }
 
 void errorf(const char *fmt, ...) {
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(_XBOX) && !defined(_XBOX_ONE)
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 #endif
@@ -174,7 +176,7 @@ void errorf(const char *fmt, ...) {
 		buf[len = ((int) sizeof buf - 2 < len) ? (int) sizeof buf - 2 : len] = '\n';
 		buf[len += !!(buf[len - 1] - '\n')] = '\0';
 
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(_XBOX) && !defined(_XBOX_ONE)
 		GetConsoleScreenBufferInfo(handle, &info);
 		SetConsoleTextAttribute(handle, FOREGROUND_RED);
 #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__APPLE__) && !defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__))
@@ -183,7 +185,7 @@ void errorf(const char *fmt, ...) {
 
 		output(buf, len);
 
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(_XBOX) && !defined(_XBOX_ONE)
 		SetConsoleTextAttribute(handle, info.wAttributes);
 #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__APPLE__) && !defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__))
 		output("\033[0m", 4);
