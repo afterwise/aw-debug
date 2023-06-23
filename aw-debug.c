@@ -119,8 +119,17 @@ bool debug_attached(void) {
 #endif
 }
 
+static debug_output_callback user_output_callback;
+static void* user_output_data;
+
+void debug_setoutputcb(debug_output_callback cb, void* userdata) {
+	user_output_callback = cb;
+	user_output_data = userdata;
+}
+
 static void output(const char *str, int len) {
-	(void) len;
+	if (user_output_callback != NULL)
+		user_output_callback(str, len, user_output_data);
 
 #if defined(_WIN32)
 	if (IsDebuggerPresent())
@@ -150,10 +159,12 @@ void debugf(const char *fmt, ...) {
 
 	va_start(ap, fmt);
 
-	if ((len = vsnprintf(buf, sizeof(buf) - 1, fmt, ap)) > 0) {
-		buf[len = ((int) sizeof buf - 2 < len) ? (int) sizeof buf - 2 : len] = '\n';
-		buf[len += !!(buf[len - 1] - '\n')] = '\0';
-
+	if ((len = vsnprintf(buf, sizeof(buf) - 2, fmt, ap)) > 0) {
+		if (len > sizeof(buf) - 2)
+			len = sizeof(buf) - 2;
+		if (buf[len - 1] != '\n')
+			buf[len++] = '\n';
+		buf[len] = '\0';
 		output(buf, len);
 	}
 
@@ -172,9 +183,12 @@ void errorf(const char *fmt, ...) {
 
 	va_start(ap, fmt);
 
-	if ((len = vsnprintf(buf, sizeof(buf) - 1, fmt, ap)) > 0) {
-		buf[len = ((int) sizeof buf - 2 < len) ? (int) sizeof buf - 2 : len] = '\n';
-		buf[len += !!(buf[len - 1] - '\n')] = '\0';
+	if ((len = vsnprintf(buf, sizeof(buf) - 2, fmt, ap)) > 0) {
+		if (len > sizeof(buf) - 2)
+			len = sizeof(buf) - 2;
+		if (buf[len - 1] != '\n')
+			buf[len++] = '\n';
+		buf[len] = '\0';
 
 #if defined(_WIN32) && !defined(_XBOX) && !defined(_XBOX_ONE)
 		GetConsoleScreenBufferInfo(handle, &info);
@@ -263,6 +277,40 @@ void debug_trace(void) {
 
 	for (i = 0; i < n; ++i)
 		debugf("0x%08x", trace[i]);
+#endif
+}
+
+void debug_dump(void* info, bool full)
+{
+#if defined(_WIN32) && !defined(_XBOX) && !defined(_XBOX_ONE)
+	char path[MAX_PATH + 1];
+	path[MAX_PATH] = 0;
+	snprintf(path, MAX_PATH, "%s.dmp", _debug_name);
+
+	DWORD pid = GetCurrentProcessId();
+	HANDLE proc = OpenProcess(PROCESS_QUERY_INFORMATION, false, pid);
+	HANDLE file = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	MINIDUMP_TYPE type = MiniDumpNormal;
+
+	if (full)
+		type = (MINIDUMP_TYPE) (
+			MiniDumpWithFullMemory |
+			MiniDumpWithFullMemoryInfo |
+			MiniDumpWithHandleData |
+			MiniDumpWithThreadInfo |
+			MiniDumpWithUnloadedModules
+		);
+
+	if (proc != NULL && proc != INVALID_HANDLE_VALUE)
+	if (file != NULL && file != INVALID_HANDLE_VALUE)
+		MiniDumpWriteDump(proc, pid, file, type, (MINIDUMP_EXCEPTION_INFORMATION*) info, NULL, NULL);
+
+	if (proc != NULL && proc != INVALID_HANDLE_VALUE)
+		CloseHandle(proc);
+
+	if (file != NULL && file != INVALID_HANDLE_VALUE)
+		CloseHandle(file);
 #endif
 }
 

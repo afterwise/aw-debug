@@ -163,7 +163,10 @@ extern "C" {
 
 _debug_api const char *_debug_name;
 
+typedef void (*debug_output_callback)(const char *str, int len, void* userdata);
+
 #if defined(DEBUG_ENABLE)
+_debug_api void debug_setoutputcb(debug_output_callback cb, void* userdata);
 _debug_api int debug_getchar(void);
 _debug_api bool debug_isatty(void);
 _debug_api bool debug_attached(void);
@@ -171,7 +174,9 @@ _debug_api void debugf(const char *fmt, ...) _debug_format(1, 2);
 _debug_api void errorf(const char *fmt, ...) _debug_format(1, 2);
 _debug_api void debug_hex(const void *p, size_t n);
 _debug_api void debug_trace(void);
+_debug_api void debug_dump(void* info, bool full);
 #else
+# define debug_setoutputcb(...) (0)
 # define debug_getchar() (0)
 # define debug_isatty() (0)
 # define debug_attached() (0)
@@ -179,6 +184,7 @@ _debug_api void debug_trace(void);
 # define errorf(...) ((void) 0)
 # define debug_hex(...) ((void) 0)
 # define debug_trace() ((void) 0)
+# define debug_dump(...) ((void) 0)
 #endif
 
 #ifdef __cplusplus
