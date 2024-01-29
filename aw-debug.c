@@ -252,6 +252,8 @@ void debug_trace(void) {
 
 		if (SymFromAddr(proc, (uintptr_t) trace[i], NULL, &u.sym))
 			debugf("%08p %s\n", trace[i], u.sym.Name);
+		else
+			debugf("%08p\n", trace[i]);
 	}
 
 	SymCleanup(proc);
