@@ -160,8 +160,8 @@ void debugf(const char *fmt, ...) {
 	va_start(ap, fmt);
 
 	if ((len = vsnprintf(buf, sizeof(buf) - 2, fmt, ap)) > 0) {
-		if (len > sizeof(buf) - 2)
-			len = sizeof(buf) - 2;
+		if (len > (int) sizeof(buf) - 2)
+			len = (int) sizeof(buf) - 2;
 		if (buf[len - 1] != '\n')
 			buf[len++] = '\n';
 		buf[len] = '\0';
@@ -184,8 +184,8 @@ void errorf(const char *fmt, ...) {
 	va_start(ap, fmt);
 
 	if ((len = vsnprintf(buf, sizeof(buf) - 2, fmt, ap)) > 0) {
-		if (len > sizeof(buf) - 2)
-			len = sizeof(buf) - 2;
+		if (len > (int) sizeof(buf) - 2)
+			len = (int) sizeof(buf) - 2;
 		if (buf[len - 1] != '\n')
 			buf[len++] = '\n';
 		buf[len] = '\0';
@@ -313,6 +313,9 @@ void debug_dump(void* info, bool full)
 
 	if (file != NULL && file != INVALID_HANDLE_VALUE)
 		CloseHandle(file);
+#else
+	(void) info;
+	(void) full;
 #endif
 }
 
