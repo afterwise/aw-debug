@@ -155,7 +155,7 @@ static void output(const char *str, int len) {
 void debugf(const char *fmt, ...) {
 	va_list ap;
 	int len;
-	char buf[256];
+	char buf[1024];
 
 	va_start(ap, fmt);
 
@@ -179,7 +179,7 @@ void errorf(const char *fmt, ...) {
 
 	va_list ap;
 	int len;
-	char buf[256];
+	char buf[1024];
 
 	va_start(ap, fmt);
 
