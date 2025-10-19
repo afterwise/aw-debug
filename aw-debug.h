@@ -174,7 +174,7 @@ _debug_api void debugf(const char *fmt, ...) _debug_format(1, 2);
 _debug_api void errorf(const char *fmt, ...) _debug_format(1, 2);
 _debug_api void debug_hex(const void *p, size_t n);
 _debug_api void debug_trace(void);
-_debug_api void debug_dump(void* info, bool full);
+_debug_api void debug_dump(unsigned long long pid, const char* name, void* info, bool full);
 #else
 # define debug_setoutputcb(...) (0)
 # define debug_getchar() (0)

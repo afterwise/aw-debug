@@ -282,31 +282,34 @@ void debug_trace(void) {
 #endif
 }
 
-void debug_dump(void* info, bool full)
+void debug_dump(unsigned long long pid, const char* name, void* info, bool full)
 {
 #if defined(_WIN32) && !defined(_XBOX) && !defined(_XBOX_ONE)
 	char path[MAX_PATH + 1];
 	path[MAX_PATH] = 0;
-	snprintf(path, MAX_PATH, "%s.dmp", _debug_name);
+	snprintf(path, MAX_PATH, "%s.dmp", (name ? name : _debug_name));
 
-	DWORD pid = GetCurrentProcessId();
-	HANDLE proc = OpenProcess(PROCESS_QUERY_INFORMATION, false, pid);
+	if (pid == 0)
+		pid = GetCurrentProcessId();
+	HANDLE proc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, (DWORD) pid);
 	HANDLE file = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	MINIDUMP_TYPE type = MiniDumpNormal;
 
 	if (full)
 		type = (MINIDUMP_TYPE) (
+			MiniDumpIgnoreInaccessibleMemory |
 			MiniDumpWithFullMemory |
 			MiniDumpWithFullMemoryInfo |
 			MiniDumpWithHandleData |
+			MiniDumpWithProcessThreadData |
 			MiniDumpWithThreadInfo |
 			MiniDumpWithUnloadedModules
 		);
 
 	if (proc != NULL && proc != INVALID_HANDLE_VALUE)
 	if (file != NULL && file != INVALID_HANDLE_VALUE)
-		MiniDumpWriteDump(proc, pid, file, type, (MINIDUMP_EXCEPTION_INFORMATION*) info, NULL, NULL);
+		MiniDumpWriteDump(proc, (DWORD) pid, file, type, (MINIDUMP_EXCEPTION_INFORMATION*) info, NULL, NULL);
 
 	if (proc != NULL && proc != INVALID_HANDLE_VALUE)
 		CloseHandle(proc);
@@ -314,6 +317,8 @@ void debug_dump(void* info, bool full)
 	if (file != NULL && file != INVALID_HANDLE_VALUE)
 		CloseHandle(file);
 #else
+	(void) pid;
+	(void) name;
 	(void) info;
 	(void) full;
 #endif
