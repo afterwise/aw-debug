@@ -209,7 +209,16 @@ void errorf(const char *fmt, ...) {
 	va_end(ap);
 }
 
-void debug_hex(const void *p, size_t n) {
+static void debug_hex_cb(size_t off, const char* s, const void* userdata)
+{
+	debugf("%016p %s", (const unsigned char*) userdata + off, s);
+}
+
+void debug_hex(const void* p, size_t n) {
+	debug_hex2(p, n, &debug_hex_cb, (void*) p);
+}
+
+void debug_hex2(const void *p, size_t n, debug_hex_callback cb, void* userdata) {
 	size_t x, y, m;
 
 	for (x = 0, m = n; x < _debug_align(m, 16u); x += 16, n -= 16) {
@@ -228,7 +237,7 @@ void debug_hex(const void *p, size_t n) {
 			s[3 * 16 + 1 + y] = 0;
 		}
 
-		debugf("%p %s", (unsigned char *) p + x, s);
+		cb(x, s, userdata);
 	}
 }
 
