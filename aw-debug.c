@@ -209,9 +209,9 @@ void errorf(const char *fmt, ...) {
 	va_end(ap);
 }
 
-static void debug_hex_cb(size_t off, const char* s, const void* userdata)
+static void debug_hex_cb(size_t off, const char* s, void* userdata)
 {
-	debugf("%016p %s", (const unsigned char*) userdata + off, s);
+	debugf("%16p %s", (const unsigned char*) userdata + off, s);
 }
 
 void debug_hex(const void* p, size_t n) {
