@@ -79,7 +79,7 @@ extern "C" {
 		if (_debug_likely(!_debug_join(_bkpt__, __LINE__))) { \
 			if (debug_isatty()) \
 				debugf("-- Skip breakpoint? [y/a/N] --"); \
-				switch(debug_getchar()) { \
+			switch(debug_getchar()) { \
 				case 'A': case 'a':  _debug_join(_bkpt__, __LINE__) = 1; \
 				case 'Y': case 'y':  goto _debug_join(_label__, __LINE__); \
 			} \
@@ -93,7 +93,7 @@ extern "C" {
 		if (_debug_likely(!_debug_join(_bkpt__, __LINE__))) { \
 			if (debug_isatty()) \
 				debugf("-- Skip breakpoint? [y/a/N] --"); \
-				switch(debug_getchar()) { \
+			switch(debug_getchar()) { \
 				case 'A': case 'a':  _debug_join(_bkpt__, __LINE__) = 1; \
 				case 'Y': case 'y':  goto _debug_join(_label__, __LINE__); \
 			} \
@@ -107,7 +107,7 @@ extern "C" {
 		if (_debug_likely(!_debug_join(_bkpt__, __LINE__))) { \
 			if (debug_isatty()) \
 				debugf("-- Skip breakpoint? [y/a/N] --"); \
-				switch(debug_getchar()) { \
+			switch(debug_getchar()) { \
 				case 'A': case 'a':  _debug_join(_bkpt__, __LINE__) = 1; \
 				case 'Y': case 'y':  goto _debug_join(_label__, __LINE__); \
 			} \
