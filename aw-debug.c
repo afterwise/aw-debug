@@ -24,7 +24,7 @@
 #ifndef _debug_nofeatures
 # if defined(_WIN32)
 #  define WIN32_LEAN_AND_MEAN 1
-# elif defined(__linux__)
+# elif defined(__linux__) || defined(__NINTENDO__)
 #  define _BSD_SOURCE 1
 #  define _DEFAULT_SOURCE 1
 #  define _POSIX_C_SOURCE 200809L
