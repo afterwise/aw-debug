@@ -246,21 +246,21 @@ void debug_trace(void) {
 	HANDLE proc = GetCurrentProcess();
 	void *trace[64];
 	size_t i, n;
-	union {
+	struct {
 		SYMBOL_INFO sym;
-		unsigned char buf[256];
-	} u;
+		unsigned char buf[500];
+	} s;
 
 	SymInitialize(proc, NULL, TRUE);
 	n = CaptureStackBackTrace(0, _debug_array_count(trace), trace, NULL);
 
 	for (i = 0; i < n; ++i) {
-		memset(&u.sym, 0, sizeof u.sym);
-		u.sym.SizeOfStruct = sizeof u.sym;
-		u.sym.MaxNameLen = (sizeof u.buf - sizeof u.sym) * sizeof(CHAR);
+		memset(&s, 0, sizeof s);
+		s.sym.SizeOfStruct = sizeof s.sym;
+		s.sym.MaxNameLen = sizeof s.buf;
 
-		if (SymFromAddr(proc, (uintptr_t) trace[i], NULL, &u.sym))
-			debugf("%08p %s\n", trace[i], u.sym.Name);
+		if (SymFromAddr(proc, (uintptr_t) trace[i], NULL, &s.sym))
+			debugf("%08p %s\n", trace[i], s.sym.Name);
 		else
 			debugf("%08p\n", trace[i]);
 	}
